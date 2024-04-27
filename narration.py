@@ -5,6 +5,6 @@ def create(narration):
         if line.startswith("Narrator: "):
             text = line.replace("Narrator: ", '')
             print(f"Text: {text}")
-        elif line.startswith("[Background image "):
-            background = line
+        elif line.startswith("Background: "):
+            background = line.replace("Background: ", '')
             print(f"Background: {background}")

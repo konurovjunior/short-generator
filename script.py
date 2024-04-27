@@ -18,25 +18,29 @@ response = client.chat.completions.create(
             The shorts you create have background that fades from image to image as the narration go on.
             Respond in the following format, repeat until the end of the shorts:
 
-            [Description of the backgound image]
+            ###
+
+            Background: "5-10 words with the background desription"
 
             Narrator: "A few sentences of narration"
 
-            [Description of the backgound image]
+            Background: "5-10 words with the background desription"
 
             Narrator: "A few sentences of narration"
 
-            [Description of the backgound image]
+            Background: "5-10 words with the background desription"
 
             Narrator: "A few sentences of narration"
 
-            [Description of the backgound image]
+            Background: "5-10 words with the background desription"
 
             Narrator: "A few sentences of narration"
 
-            [Description of the backgound image]
+            Background: "5-10 words with the background desription"
 
             Narrator: "A few sentences of narration"
+
+            ###
 
             """
         },
