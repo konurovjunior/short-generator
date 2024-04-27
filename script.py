@@ -1,8 +1,16 @@
 import config
 import narration
 from openai import OpenAI
+from elevenlabs.client import ElevenLabs
+
+narration_api =  "eleven_labs" # or ("openai")
 
 openai_client = OpenAI(api_key=config.OPEN_AI_API_KEY)
+
+if narration_api == "eleven_labs":
+    client = ElevenLabs(api_key=config.ELEVEN_LABS_API_KEY)
+else:
+    client = openai_client
 
 with open("source_material.txt") as f:
     source_material = f.read()
@@ -52,4 +60,4 @@ response = openai_client.chat.completions.create(
 )
 
 data = narration.parse(response.choices[0].message.content)
-narration.create(openai_client, data, "narration.mp3")
+narration.create(client, data, "narration.mp3")

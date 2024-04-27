@@ -1,4 +1,10 @@
 import openai
+import config
+from openai import OpenAI
+from elevenlabs.client import ElevenLabs
+from elevenlabs import save
+
+narration_api =  "eleven_labs" # or ("openai")
 
 def parse(narration):
     output = []
@@ -19,7 +25,7 @@ def parse(narration):
             })
     return output
 
-def create(openai_client, data, output_file):
+def create(client, data, output_file):
     narration = ""
     for element in data:
         if element["type"] != "text":
@@ -27,10 +33,18 @@ def create(openai_client, data, output_file):
         else:
             narration += element["content"] + "\n\n"
         
-    audio = openai_client.audio.speech.create(
-        input = narration,
-        model = "tts-1",
-        voice = "alloy"
-    )
+    if isinstance(client, OpenAI):
+        audio = client.audio.speech.create(
+            input = narration,
+            model = "tts-1",
+            voice = "alloy"
+        )
 
-    audio.stream_to_file(output_file)
+        audio.stream_to_file(output_file)
+    elif isinstance(client, ElevenLabs):
+        audio = client.generate(
+            text=narration,
+            voice="Adam",
+            model="eleven_monolingual_v1"
+        )
+        save(audio, output_file)
