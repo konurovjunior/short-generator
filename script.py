@@ -1,4 +1,5 @@
 import config
+import narration
 from openai import OpenAI
 
 client = OpenAI(api_key=config.OPEN_AI_API_KEY)
@@ -46,4 +47,4 @@ response = client.chat.completions.create(
     ]
 )
 
-print(response.choices[0].message.content)
+narration.create(response.choices[0].message.content)
