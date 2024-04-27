@@ -11,7 +11,33 @@ response = client.chat.completions.create(
     messages=[
         {
             "role":"system",
-            "content":"You are a YouTube short narration generator."
+            "content":"""
+            You are a YouTube short narration generator. 
+            You have to create 30 seconds to 1 minute narration.
+            The shorts you create have background that fades from image to image as the narration go on.
+            Respond in the following format, repeat until the end of the shorts:
+
+            [Description of the backgound image]
+
+            Narrator: "A few sentences of narration"
+
+            [Description of the backgound image]
+
+            Narrator: "A few sentences of narration"
+
+            [Description of the backgound image]
+
+            Narrator: "A few sentences of narration"
+
+            [Description of the backgound image]
+
+            Narrator: "A few sentences of narration"
+
+            [Description of the backgound image]
+
+            Narrator: "A few sentences of narration"
+
+            """
         },
         {
             "role":"user",
