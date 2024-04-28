@@ -1,19 +1,23 @@
 import cv2
 import numpy as np
 import os
+import glob
 
-width, height = 1024, 1920
+width, height = 1024, 1792
 frame_rate = 30
+fade_time = 2000
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 output_file = 'vertical_video.avi'
 out = cv2.VideoWriter(output_file, fourcc, frame_rate, (width, height))
 
-image_paths = os.listdir("images")
+image_paths = glob.glob(os.path.join("images", '*'))
+
+print(image_paths)
 
 for i in range(len(image_paths) - 1):
-    image1 = cv2.imread(os.path.join("images", image_paths[i]))
-    image2 = cv2.imread(os.path.join("images", image_paths[i + 1]))
+    image1 = cv2.imread(image_paths[i])
+    image2 = cv2.imread(image_paths[i+1])
 
     for alpha in np.linspace(0, 1, frame_rate):
         blended_image = cv2.addWeighted(image1, 1 - alpha, image2, alpha, 0)

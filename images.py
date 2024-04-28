@@ -19,11 +19,11 @@ def create_from_data(data):
             image_name = f"image_{image_number}.webp"
             generate(element["description"], os.path.join("images", image_name))
 
-def generate(prompt, output_file):
+def generate(prompt, output_file, size="1024x1792"):
     response = client.images.generate(
         model="dall-e-3",
         prompt=prompt,
-        size="1024x1024",
+        size=size,
         quality="standard",
         response_format="b64_json",
         n=1

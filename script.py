@@ -63,5 +63,5 @@ response = openai_client.chat.completions.create(
 )
 
 data = narration.parse(response.choices[0].message.content)
-narration.create(client, data, "narration.mp3")
+#narration.create(client, data, "narration.mp3")
 images.create_from_data(data)
