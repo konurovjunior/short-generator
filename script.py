@@ -4,6 +4,7 @@ import images
 
 from openai import OpenAI
 from elevenlabs.client import ElevenLabs
+import json
 
 #narration_api = "eleven_labs"
 narration_api = "openai"
@@ -63,5 +64,9 @@ response = openai_client.chat.completions.create(
 )
 
 data = narration.parse(response.choices[0].message.content)
-#narration.create(client, data, "narration.mp3")
-images.create_from_data(data)
+
+with open("data.json", "w") as f:
+    json.dump(data, f)
+
+#narration.create(client, data, "narrations")
+#images.create_from_data(data)

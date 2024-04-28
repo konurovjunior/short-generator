@@ -1,8 +1,7 @@
-import openai
-import config
 from openai import OpenAI
 from elevenlabs.client import ElevenLabs
 from elevenlabs import save
+import os
 
 narration_api =  "eleven_labs" # or ("openai")
 
@@ -25,26 +24,29 @@ def parse(narration):
             })
     return output
 
-def create(client, data, output_file):
-    narration = ""
+def create(client, data, output_folder):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    n = 0 
     for element in data:
         if element["type"] != "text":
             continue
-        else:
-            narration += element["content"] + "\n\n"
-        
-    if isinstance(client, OpenAI):
-        audio = client.audio.speech.create(
-            input = narration,
-            model = "tts-1",
-            voice = "alloy"
-        )
 
-        audio.stream_to_file(output_file)
-    elif isinstance(client, ElevenLabs):
-        audio = client.generate(
-            text=narration,
-            voice="Adam",
-            model="eleven_monolingual_v1"
-        )
-        save(audio, output_file)
+        n += 1
+        output_file = os.path.join(output_folder, f"narration_{n}.mp3")
+        
+        if isinstance(client, OpenAI):
+            audio = client.audio.speech.create(
+                input = element["content"],
+                model = "tts-1",
+                voice = "alloy"
+            )
+
+            audio.stream_to_file(output_file)
+        elif isinstance(client, ElevenLabs):
+            audio = client.generate(
+                text=element["content"],
+                voice="Adam",
+                model="eleven_monolingual_v1"
+            )
+            save(audio, output_file)
