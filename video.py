@@ -3,6 +3,9 @@ import numpy as np
 import os
 import glob
 import math
+import subprocess
+import shlex
+import ffmpeg
 
 width, height = 1024, 1792
 frame_rate = 30
@@ -43,5 +46,25 @@ for alpha in np.linspace(0, 1, math.ceil(fade_time/1000*30)):
 
 out.release()
 cv2.destroyAllWindows()
+
+final_video = "final_video.avi"
+
+ffmpeg_command = ['ffmpeg',
+    '-i', output_file,
+    '-i', 'narration.mp3',
+    '-map', '0:v',
+    '-map', '1:a',
+    '-c:v', 'copy',
+    '-c:a', 'aac',
+    '-strict', 'experimental',
+    '-shortest',
+    final_video
+]
+
+#cmd = f"ffmpeg -i {output_file} narration.mp3 -map 0:v -map 1:a -c:v copy -c:a aac -strict experimental -shortest {final_video}"
+
+subprocess.run(ffmpeg_command)
+
+os.remove(output_file)
 
 print(f"Video saved as {output_file}")
