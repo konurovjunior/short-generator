@@ -5,7 +5,8 @@ import images
 from openai import OpenAI
 from elevenlabs.client import ElevenLabs
 
-narration_api =  "eleven_labs" # or ("openai")
+#narration_api = "eleven_labs"
+narration_api = "openai"
 
 openai_client = OpenAI(api_key=config.OPEN_AI_API_KEY)
 
