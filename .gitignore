@@ -2,6 +2,9 @@ config.py
 narration.txt
 source_material.txt
 /images
+/old_images
 source_material.txt
 narration.mp3
 vertical_video.avi
+.DS_Store
+.DS_Store
