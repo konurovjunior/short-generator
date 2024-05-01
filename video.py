@@ -80,6 +80,6 @@ ffmpeg_command = ['ffmpeg',
 subprocess.run(ffmpeg_command, capture_output=True)
 
 os.remove(output_file)
-os.remove("narration.mp3")
+#os.remove("narration.mp3")
 
 print(f"Video saved as {output_file}")

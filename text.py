@@ -3,6 +3,7 @@ import json
 from pydub import AudioSegment
 import os
 import math
+import subprocess
 
 def get_audio_duration(audio_file):
     audio = AudioSegment.from_file(audio_file)
@@ -62,27 +63,25 @@ for i, narration in enumerate(narrations):
             if not ret:
                 break 
             write_text(word, frame, out)
-        
-# for i in range(5 * 30):
-#     ret, frame = cap.read()
-#     if not ret:
-#         break 
-
-#     write_text("hello", frame, out)
-    
-# for i in range(5 * 30):
-#     ret, frame = cap.read()
-#     if not ret:
-#         break 
-#     write_text("fucking", frame, out)
-
-# for i in range(5 * 30):
-#     ret, frame = cap.read()
-#     if not ret:
-#         break 
-#     write_text("world", frame, out)
 
 cap.release()
 out.release()
 
 cv2.destroyAllWindows()
+
+final_video = "final_with_text.avi"
+
+ffmpeg_command = ['ffmpeg',
+    '-y', 
+    '-i', 'with_transcript.avi',
+    '-i', 'narration.mp3',
+    '-map', '0:v',
+    '-map', '1:a',
+    '-c:v', 'copy',
+    '-c:a', 'aac',
+    '-strict', 'experimental',
+    '-shortest',
+    final_video
+]
+
+subprocess.run(ffmpeg_command, capture_output=True)
