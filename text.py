@@ -52,10 +52,12 @@ narrations = get_narrations()
 for i, narration in enumerate(narrations):
     audio = os.path.join("narrations", f"narration_{i+1}.mp3")
     duration = get_audio_duration(audio)
+    narration_frames = math.floor(duration / 1000 * 30)
 
     char_count = len(narration["content"].replace(" ", ""))
     ms_per_char = duration / char_count
 
+    frames_written = 0
     words = narration["content"].split(" ")
     for word in words:
         word_ms = len(word) * ms_per_char
@@ -64,6 +66,10 @@ for i, narration in enumerate(narrations):
             if not ret:
                 break 
             write_text(word, frame, out)
+            frames_written += 1
+
+    for i in range(narration_frames - frames_written):
+        out.write(frame)
 
 cap.release()
 out.release()
