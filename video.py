@@ -15,7 +15,7 @@ def get_audio_duration(audio_file):
 
 width, height = 1024, 1792
 frame_rate = 30
-wait_time = 4000
+wait_time = 2000
 fade_time = 1000
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -34,9 +34,12 @@ for i, image in enumerate(image_paths):
         image2 = cv2.imread(image_paths[0])
 
     narration = os.path.join("narrations", f"narration_{i+1}.mp3")
-    duration = get_audio_duration(narration) - fade_time
+    duration = get_audio_duration(narration)
 
-    if i > 0 or i == len(image_paths) - 1:
+    if i > 0:
+        duration -= fade_time
+
+    if i == len(image_paths) - 1:
         duration -= fade_time
 
     full_narration += AudioSegment.from_file(narration)
@@ -62,7 +65,7 @@ full_narration.export("narration.mp3", format="mp3")
 final_video = "final_video.avi"
 
 ffmpeg_command = ['ffmpeg',
-    'y',
+    '-y',
     '-i', output_file,
     '-i', 'narration.mp3',
     '-map', '0:v',
