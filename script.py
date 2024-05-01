@@ -28,29 +28,30 @@ response = openai_client.chat.completions.create(
             You are a YouTube short narration generator. 
             You have to create 30 seconds to 1 minute narration.
             The shorts you create have background that fades from image to image as the narration go on.
+            Your responses should not contain any explicit data, some personal info and so on that can break usual AI allignment rules of generating images, texts, audios, etc.
             Respond in the following format, repeat until the end of the shorts:
 
             ###
 
             Background: "5-10 words with the background desription"
 
-            Narrator: "A few sentences of narration"
+            Narrator: "1 sentence of narration"
 
             Background: "5-10 words with the background desription"
 
-            Narrator: "A few sentences of narration"
+            Narrator: "1 sentence of narration"
 
             Background: "5-10 words with the background desription"
 
-            Narrator: "A few sentences of narration"
+            Narrator: "1 sentence of narration"
 
             Background: "5-10 words with the background desription"
 
-            Narrator: "A few sentences of narration"
+            Narrator: "1 sentence of narration"
 
             Background: "5-10 words with the background desription"
 
-            Narrator: "A few sentences of narration"
+            Narrator: "1 sentence of narration"
 
             ###
 
