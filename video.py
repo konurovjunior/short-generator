@@ -3,9 +3,7 @@ import numpy as np
 import os
 import glob
 import math
-import subprocess
-import shlex
-import ffmpeg
+import text
 from pydub import AudioSegment
 
 def get_audio_duration(audio_file):
@@ -13,73 +11,65 @@ def get_audio_duration(audio_file):
     duration_in_ms = len(audio)
     return duration_in_ms
 
-width, height = 1024, 1792
-frame_rate = 30
-wait_time = 2000
-fade_time = 1000
-
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
-output_file = 'vertical_video.avi'
-out = cv2.VideoWriter(output_file, fourcc, frame_rate, (width, height))
-
-image_paths = glob.glob(os.path.join("images", '*'))
-image_paths = sorted(image_paths)
-full_narration  = AudioSegment.empty()
-
-for i, image in enumerate(image_paths):
-    image1 = cv2.imread(image_paths[i])
-    if i < len(image_paths) - 1:
-        image2 = cv2.imread(image_paths[i+1])
+def resize_image(image, width, height):
+    aspect_ratio = image.shape[1] / image.shape[0]
+    if aspect_ratio > (width / height):
+        new_width = width
+        new_height = int(width / aspect_ratio)
     else:
-        image2 = cv2.imread(image_paths[0])
+        new_height = height
+        new_width = int(height * aspect_ratio)
+    return cv2.resize(image, (new_width, new_height))
 
-    narration = os.path.join("narrations", f"narration_{i+1}.mp3")
-    duration = get_audio_duration(narration)
+def create_video():
+    width, height = 1080, 1920
+    frame_rate = 30
+    wait_time = 2000
+    fade_time = 1000
 
-    if i > 0:
-        duration -= fade_time
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    output_file = 'vertical_video.avi'
+    out = cv2.VideoWriter(output_file, fourcc, frame_rate, (width, height))
 
-    if i == len(image_paths) - 1:
-        duration -= fade_time
+    image_paths = glob.glob(os.path.join("images", '*'))
+    image_paths = sorted(image_paths)
 
-    full_narration += AudioSegment.from_file(narration)
+    for i, image in enumerate(image_paths):
+        image1 = cv2.imread(image_paths[i])
+        if i < len(image_paths) - 1:
+            image2 = cv2.imread(image_paths[i+1])
+        else:
+            image2 = cv2.imread(image_paths[0])
 
-    for _ in range(math.ceil(duration/1000*30)):
-        vertical_video_frame = np.zeros((height, width, 3), dtype=np.uint8)
-        vertical_video_frame[:image1.shape[0], :] = image1
+        image1 = resize_image(image1, 1080, 1920)
+        image2 = resize_image(image2, 1080, 1920)
 
-        out.write(vertical_video_frame)
+        narration = os.path.join("narrations", f"narration_{i+1}.mp3")
+        duration = get_audio_duration(narration)
 
-    for alpha in np.linspace(0, 1, math.ceil(fade_time/1000*30)):
-        blended_image = cv2.addWeighted(image1, 1 - alpha, image2, alpha, 0)
-        vertical_video_frame = np.zeros((height, width, 3), dtype=np.uint8)
-        vertical_video_frame[:image1.shape[0], :] = blended_image
+        if i > 0:
+            duration -= fade_time
 
-        out.write(vertical_video_frame)
+        if i == len(image_paths) - 1:
+            duration -= fade_time
 
-out.release()
-cv2.destroyAllWindows()
+        for _ in range(math.ceil(duration/1000*30)):
+            vertical_video_frame = np.zeros((height, width, 3), dtype=np.uint8)
+            vertical_video_frame[:image1.shape[0], :] = image1
 
-full_narration.export("narration.mp3", format="mp3")
+            out.write(vertical_video_frame)
 
-final_video = "final_video.avi"
+        for alpha in np.linspace(0, 1, math.ceil(fade_time/1000*30)):
+            blended_image = cv2.addWeighted(image1, 1 - alpha, image2, alpha, 0)
+            vertical_video_frame = np.zeros((height, width, 3), dtype=np.uint8)
+            vertical_video_frame[:image1.shape[0], :] = blended_image
 
-ffmpeg_command = ['ffmpeg',
-    '-y',
-    '-i', output_file,
-    '-i', 'narration.mp3',
-    '-map', '0:v',
-    '-map', '1:a',
-    '-c:v', 'copy',
-    '-c:a', 'aac',
-    '-strict', 'experimental',
-    '-shortest',
-    final_video
-]
+            out.write(vertical_video_frame)
 
-subprocess.run(ffmpeg_command, capture_output=True)
+    out.release()
+    cv2.destroyAllWindows()
 
-os.remove(output_file)
-#os.remove("narration.mp3")
+    final_video = "final_video.avi"
+    text.add_narration_to_video(output_file, final_video)
 
-print(f"Video saved as {output_file}")
+    os.remove(output_file)
