@@ -5,6 +5,8 @@ import os
 import math
 import subprocess
 
+offset = 50
+
 def get_audio_duration(audio_file):
     audio = AudioSegment.from_file(audio_file)
     duration_in_ms = len(audio)
@@ -40,55 +42,70 @@ def get_narrations() -> str:
     
     return narrations
 
-input_video = "final_video.avi"
-cap = cv2.VideoCapture(input_video)
+def add_narration_to_video(input_video, output_video):
+    input_video = "final_video.avi"
+    cap = cv2.VideoCapture(input_video)
 
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
-output_video = "with_transcript.avi"
-out = cv2.VideoWriter(output_video, fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    temp_video = "with_transcript.avi"
+    out = cv2.VideoWriter(temp_video, fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
 
-narrations = get_narrations()
+    full_narration  = AudioSegment.empty()
+    narrations = get_narrations()
 
-for i, narration in enumerate(narrations):
-    audio = os.path.join("narrations", f"narration_{i+1}.mp3")
-    duration = get_audio_duration(audio)
-    narration_frames = math.floor(duration / 1000 * 30)
+    for i, narration in enumerate(narrations):
+        audio = os.path.join("narrations", f"narration_{i+1}.mp3")
+        duration = get_audio_duration(audio)
+        narration_frames = math.floor(duration / 1000 * 30)
 
-    char_count = len(narration["content"].replace(" ", ""))
-    ms_per_char = duration / char_count
+        full_narration += AudioSegment.from_file(audio)
 
-    frames_written = 0
-    words = narration["content"].split(" ")
-    for word in words:
-        word_ms = len(word) * ms_per_char
-        for i in range(math.floor(word_ms/1000*30)):
-            ret, frame = cap.read()
-            if not ret:
-                break 
-            write_text(word, frame, out)
-            frames_written += 1
+        char_count = len(narration["content"].replace(" ", ""))
+        ms_per_char = duration / char_count
 
-    for i in range(narration_frames - frames_written):
-        out.write(frame)
+        frames_written = 0
+        words = narration["content"].split(" ")
 
-cap.release()
-out.release()
+        for w, word in enumerate(words):
+            word_ms = len(word) * ms_per_char
 
-cv2.destroyAllWindows()
+            if i == 0 & w == 0:
+                word_ms -= offset
+                if word_ms < 0:
+                    word_ms = 0
 
-final_video = "final_with_text.avi"
+            for _ in range(math.floor(word_ms/1000*30)):
+                ret, frame = cap.read()
+                if not ret:
+                    break 
+                write_text(word, frame, out)
+                frames_written += 1
 
-ffmpeg_command = ['ffmpeg',
-    '-y', 
-    '-i', 'with_transcript.avi',
-    '-i', 'narration.mp3',
-    '-map', '0:v',
-    '-map', '1:a',
-    '-c:v', 'copy',
-    '-c:a', 'aac',
-    '-strict', 'experimental',
-    '-shortest',
-    final_video
-]
+        for _ in range(narration_frames - frames_written):
+            out.write(frame)
 
-subprocess.run(ffmpeg_command, capture_output=True)
+    temp_narration = "narration.mp3"
+    full_narration.export(temp_narration, format="mp3")
+
+    cap.release()
+    out.release()
+
+    cv2.destroyAllWindows()
+
+    ffmpeg_command = ['ffmpeg',
+        '-y', 
+        '-i', temp_video,
+        '-i', temp_narration,
+        '-map', '0:v',
+        '-map', '1:a',
+        '-c:v', 'copy',
+        '-c:a', 'aac',
+        '-strict', 'experimental',
+        '-shortest',
+        output_video
+    ]
+
+    subprocess.run(ffmpeg_command, capture_output=True)
+
+    os.remove(temp_video)
+    os.remove(temp_narration)
