@@ -32,14 +32,14 @@ def create(output_video):
     out = cv2.VideoWriter(temp_video, fourcc, frame_rate, (width, height))
 
     image_paths = glob.glob(os.path.join("images", '*'))
-    image_paths = sorted(image_paths)
+    image_count = len(image_paths)
 
-    for i, image in enumerate(image_paths):
-        image1 = cv2.imread(image_paths[i])
-        if i < len(image_paths) - 1:
-            image2 = cv2.imread(image_paths[i+1])
+    for i in range(image_count):
+        image1 = cv2.imread(os.path.join("images", f"image_{i+1}.webp"))
+        if i + 1 < image_count:
+            image2 = cv2.imread(os.path.join("images", f"image_{i+2}.webp"))
         else:
-            image2 = cv2.imread(image_paths[0])
+            image2 = cv2.imread(os.path.join("images", f"image_1.webp"))
 
         image1 = resize_image(image1, 1080, 1920)
         image2 = resize_image(image2, 1080, 1920)

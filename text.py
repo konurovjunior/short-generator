@@ -81,7 +81,14 @@ def add_narration_to_video(input_video, output_video):
                 frames_written += 1
 
         for _ in range(narration_frames - frames_written):
+            ret, frame = cap.read()
             out.write(frame)
+
+    while out.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        out.write(frame)
 
     temp_narration = "narration.mp3"
     full_narration.export(temp_narration, format="mp3")
@@ -100,7 +107,6 @@ def add_narration_to_video(input_video, output_video):
         '-c:v', 'copy',
         '-c:a', 'aac',
         '-strict', 'experimental',
-        '-shortest',
         output_video
     ]
 
