@@ -12,12 +12,23 @@ while cap.isOpened():
     if not ret:
         break
 
+    height, width, _ = frame.shape
+
     text = "this is a sample text"
     font = cv2.FONT_HERSHEY_SIMPLEX
-    color = (255, 255, 255)
-    thickness = 2
-    org = (50, 50)
-    frame = cv2.putText(frame, text, org, font, 1, color, thickness, cv2.LINE_AA)
+    white_color = (255, 255, 255)
+    black_color = (0, 0, 0)
+    thickness = 10
+    font_scale = 3
+    stroke = 3
+
+    text_size = cv2.getTextSize(text, font, font_scale, thickness)[0]
+    text_x = (frame.shape[1] - text_size[0]) // 2
+    text_y = (frame.shape[0] + text_size[1]) // 2
+    org = (text_x, text_y)
+
+    frame = cv2.putText(frame, text, org, font, font_scale, black_color, thickness + stroke, cv2.LINE_AA)
+    frame = cv2.putText(frame, text, org, font, font_scale, white_color, thickness, cv2.LINE_AA)
 
     out.write(frame)
 
