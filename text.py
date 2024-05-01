@@ -43,7 +43,6 @@ def get_narrations() -> str:
     return narrations
 
 def add_narration_to_video(input_video, output_video):
-    input_video = "final_video.avi"
     cap = cv2.VideoCapture(input_video)
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')

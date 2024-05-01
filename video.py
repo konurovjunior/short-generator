@@ -21,15 +21,15 @@ def resize_image(image, width, height):
         new_width = int(height * aspect_ratio)
     return cv2.resize(image, (new_width, new_height))
 
-def create_video():
+def create(output_video):
     width, height = 1080, 1920
     frame_rate = 30
     wait_time = 2000
     fade_time = 1000
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    output_file = 'vertical_video.avi'
-    out = cv2.VideoWriter(output_file, fourcc, frame_rate, (width, height))
+    temp_video = 'vertical_video.avi'
+    out = cv2.VideoWriter(temp_video, fourcc, frame_rate, (width, height))
 
     image_paths = glob.glob(os.path.join("images", '*'))
     image_paths = sorted(image_paths)
@@ -69,7 +69,6 @@ def create_video():
     out.release()
     cv2.destroyAllWindows()
 
-    final_video = "final_video.avi"
-    text.add_narration_to_video(output_file, final_video)
+    text.add_narration_to_video(temp_video, output_video)
 
-    os.remove(output_file)
+    os.remove(temp_video)
