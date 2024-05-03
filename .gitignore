@@ -4,11 +4,9 @@ source_material.txt
 /images
 /old_images
 /narrations
-source_material.txt
-narration.mp3
-vertical_video.avi
 .DS_Store
-final_video.avi
-data.json
-with_transcript.avi
-final_with_text.avi
+*.txt
+*.json
+*.avi
+*.mp3
+*.mp4
