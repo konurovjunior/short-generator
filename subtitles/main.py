@@ -36,61 +36,67 @@ def ffmpeg(command):
     return subprocess.run(command, capture_output=True)
 
 def main():
-    ffmpeg(
-    ['ffmpeg',
+    ffmpeg([
+        'ffmpeg',
         '-y', 
         '-i', video_file,
         temp_audio_file
     ])
 
-# model = whisper.load_model("base")
+    # model = whisper.load_model("base")
 
-# transcription = model.transcribe(
-#     audio=temp_audio_file ,
-#     word_timestamps=True,
-#     fp16=False,
-# ) 
+    # transcription = model.transcribe(
+    #     audio=temp_audio_file ,
+    #     word_timestamps=True,
+    #     fp16=False,
+    # ) 
 
-# segments = transcription["segments"]
+    # segments = transcription["segments"]
 
-with open("segments.json") as f:
-    segments = json.load(f)
+    with open("segments.json") as f:
+        segments = json.load(f)
 
-words = {}
-for segment in segments:
-    for word in segment["words"]:
-        words[word["start"]] = word["word"] 
+    words = {}
+    for segment in segments:
+        for word in segment["words"]:
+            words[word["start"]] = word["word"] 
 
-#print(words)
+    #print(words)
 
-#with open("segments.json", "w") as f:
-#    json.dump(segments, f)
+    #with open("segments.json", "w") as f:
+    #    json.dump(segments, f)
 
-cap = cv2.VideoCapture(video_file)
-framerate = cap.get(cv2.CAP_PROP_FPS)
+    cap = cv2.VideoCapture(video_file)
+    framerate = cap.get(cv2.CAP_PROP_FPS)
 
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter(temp_video_file, fourcc, framerate, (int(cap.get(3)), int(cap.get(4))))
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(temp_video_file, fourcc, framerate, (int(cap.get(3)), int(cap.get(4))))
 
-time = 0
-while cap.isOpened():
-    ret, frame = cap.read()
-    if not ret:
-        break
-
-    for start_time, word in words.items():
-        if start_time <= time:
-            word_to_use = word
-        else:
+    time = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
             break
 
-    write_text(word_to_use, frame, out)
+        for start_time, word in words.items():
+            if start_time <= time:
+                word_to_use = word
+            else:
+                break
 
-    time += 1/framerate
+        write_text(word_to_use, frame, out)
 
-    out.write(frame)
+        time += 1/framerate
 
-ffmpeg_command = ['ffmpeg',
+        out.write(frame)
+
+    cap.release()
+    out.release()
+
+    cv2.destroyAllWindows()
+
+    ffmpeg([
+        'ffmpeg',
         '-y', 
         '-i', temp_video_file,
         '-i', temp_audio_file ,
@@ -98,16 +104,9 @@ ffmpeg_command = ['ffmpeg',
         '-map', '1:a',
         '-c:v', 'copy',
         '-c:a', 'aac', 
-        '-strict', 'experimental',
+        '-strict', 'experimental'  ,
         output_file
-    ]
-
-cap.release()
-out.release()
-
-cv2.destroyAllWindows()
-
-ffmpeg(ffmpeg_command)
+    ])
 
 if __name__ == "__main__":
     main()
