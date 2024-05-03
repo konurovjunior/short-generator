@@ -24,7 +24,6 @@ def resize_image(image, width, height):
 def create(output_video):
     width, height = 1080, 1920
     frame_rate = 30
-    wait_time = 2000
     fade_time = 1000
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')

@@ -25,8 +25,8 @@ def write_text(text, frame, video_writer):
     text_y = (frame.shape[0] + text_size[1]) // 2
     org = (text_x, text_y)
 
-    frame = cv2.putText(frame, text, org, font, font_scale, black_color, thickness + stroke, cv2.LINE_AA)
-    frame = cv2.putText(frame, text, org, font, font_scale, white_color, thickness, cv2.LINE_AA) 
+    #frame = cv2.putText(frame, text, org, font, font_scale, black_color, thickness + stroke, cv2.LINE_AA)
+    #frame = cv2.putText(frame, text, org, font, font_scale, white_color, thickness, cv2.LINE_AA) 
 
     video_writer.write(frame)
 
@@ -77,7 +77,7 @@ def add_narration_to_video(input_video, output_video):
                 ret, frame = cap.read()
                 if not ret:
                     break 
-                write_text(word, frame, out)
+                #write_text(word, frame, out)
                 frames_written += 1
 
         for _ in range(narration_frames - frames_written):

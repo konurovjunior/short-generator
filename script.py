@@ -77,5 +77,5 @@ print("Generating data...")
 # print("Generating images...")
 # images.create_from_data(data)
 
-# print("Generating video...")
+print("Generating video...")
 video.create("youtube_short.avi")
