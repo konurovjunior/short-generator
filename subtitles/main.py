@@ -4,6 +4,24 @@ import json
 import cv2
 import os
 
+def write_text(text, frame, video_writer):
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    white_color = (255, 255, 255)
+    black_color = (0, 0, 0)
+    thickness = 10
+    font_scale = 3
+    stroke = 10
+
+    text_size = cv2.getTextSize(text, font, font_scale, thickness)[0]
+    text_x = (frame.shape[1] - text_size[0]) // 2
+    text_y = (frame.shape[0] + text_size[1]) // 2
+    org = (text_x, text_y)
+
+    #frame = cv2.putText(frame, text, org, font, font_scale, black_color, thickness + stroke, cv2.LINE_AA)
+    #frame = cv2.putText(frame, text, org, font, font_scale, white_color, thickness, cv2.LINE_AA) 
+
+    video_writer.write(frame)
+
 audio_file = sys.argv[1]
 video_file = sys.argv[2]
 
