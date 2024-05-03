@@ -1,8 +1,18 @@
 import whisper
+import subprocess
+import ffmpeg
 import sys
+import tempfile
 import json
 import cv2
 import os
+
+video_file = sys.argv[1]
+
+current_dir = os.path.dirname(os.path.realpath(__file__))
+output_file = os.path.join(current_dir, "with_transcript.avi")
+temp_video_file = tempfile.NamedTemporaryFile(suffix=".avi").name
+temp_audio_file = tempfile.NamedTemporaryFile(suffix=".wav").name
 
 def write_text(text, frame, video_writer):
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -17,21 +27,26 @@ def write_text(text, frame, video_writer):
     text_y = (frame.shape[0] + text_size[1]) // 2
     org = (text_x, text_y)
 
-    #frame = cv2.putText(frame, text, org, font, font_scale, black_color, thickness + stroke, cv2.LINE_AA)
-    #frame = cv2.putText(frame, text, org, font, font_scale, white_color, thickness, cv2.LINE_AA) 
+    frame = cv2.putText(frame, text, org, font, font_scale, black_color, thickness + stroke, cv2.LINE_AA)
+    frame = cv2.putText(frame, text, org, font, font_scale, white_color, thickness, cv2.LINE_AA) 
 
     video_writer.write(frame)
 
-audio_file = sys.argv[1]
-video_file = sys.argv[2]
+def ffmpeg(command):
+    return subprocess.run(command, capture_output=True)
 
-current_dir = os.path.dirname(os.path.realpath(__file__))
-output_file = os.path.join(current_dir, "with_transcript.avi")
+def main():
+    ffmpeg(
+    ['ffmpeg',
+        '-y', 
+        '-i', video_file,
+        temp_audio_file
+    ])
 
 # model = whisper.load_model("base")
 
 # transcription = model.transcribe(
-#     audio=audio_file,
+#     audio=temp_audio_file ,
 #     word_timestamps=True,
 #     fp16=False,
 # ) 
@@ -46,7 +61,7 @@ for segment in segments:
     for word in segment["words"]:
         words[word["start"]] = word["word"] 
 
-print(words)
+#print(words)
 
 #with open("segments.json", "w") as f:
 #    json.dump(segments, f)
@@ -55,15 +70,12 @@ cap = cv2.VideoCapture(video_file)
 framerate = cap.get(cv2.CAP_PROP_FPS)
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter(output_file, fourcc, framerate, (int(cap.get(3)), int(cap.get(4))))
+out = cv2.VideoWriter(temp_video_file, fourcc, framerate, (int(cap.get(3)), int(cap.get(4))))
 
 time = 0
-frame_number = 0
 while cap.isOpened():
     ret, frame = cap.read()
-    frame_number += 1
     if not ret:
-        print(f"Broke on {frame_number}")
         break
 
     for start_time, word in words.items():
@@ -72,8 +84,30 @@ while cap.isOpened():
         else:
             break
 
-    cv2.putText(frame, word_to_use, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+    write_text(word_to_use, frame, out)
 
     time += 1/framerate
 
     out.write(frame)
+
+ffmpeg_command = ['ffmpeg',
+        '-y', 
+        '-i', temp_video_file,
+        '-i', temp_audio_file ,
+        '-map', '0:v',
+        '-map', '1:a',
+        '-c:v', 'copy',
+        '-c:a', 'aac', 
+        '-strict', 'experimental',
+        output_file
+    ]
+
+cap.release()
+out.release()
+
+cv2.destroyAllWindows()
+
+ffmpeg(ffmpeg_command)
+
+if __name__ == "__main__":
+    main()
