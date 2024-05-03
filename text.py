@@ -77,7 +77,7 @@ def add_narration_to_video(input_video, output_video):
                 ret, frame = cap.read()
                 if not ret:
                     break 
-                #write_text(word, frame, out)
+                write_text(word, frame, out)
                 frames_written += 1
 
         for _ in range(narration_frames - frames_written):
